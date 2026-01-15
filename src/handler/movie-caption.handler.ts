@@ -2,7 +2,6 @@ import { Stream, Subtitle } from "stremio-addon-sdk";
 import { makeApiRequestWithCookies, processApiResponse } from "../utils/fetcher.utils";
 import NodeCache from "node-cache";
 import nameToImdb from "name-to-imdb";
-import { getSubtitleUrl } from "../utils/opensubtitle.utils";
 
 export const movieCaptionHanlder = async (id: string) => {
   try {
@@ -11,7 +10,7 @@ export const movieCaptionHanlder = async (id: string) => {
 
     const cachedCaptions = cache.get<Subtitle[]>(cacheKey);
     if (cachedCaptions) return cachedCaptions;
-    
+
     console.log(`Fetching movie stream for ID: ${id}`);
     const infoResponse = await makeApiRequestWithCookies(`https://h5-api.aoneroom.com/wefeed-h5-bff/web/subject/detail`, {
       method: 'GET',
@@ -84,21 +83,22 @@ export const movieCaptionHanlder = async (id: string) => {
     content.captions.forEach((source: any) => {
       subtitles.push({
         id: source.id,
-        lang: (source.lan || 'Unknown').replace('in_id', 'id'),
+        lang: (source.lan || 'Unknown').replace('in_id', 'ind'),
         url: source.url,
       });
     })
 
     var result = await nameToImdb({ name: movieInfo.subject.title, year: movieInfo.subject.releaseDate.substring(0, 4) });
-    const subtitle = await getSubtitleUrl(result.res, 'id');
+    const subtitle = await fetch(`https://opensubtitles-v3.strem.io/subtitles/movie/${result.res}.json`);
+    const subtitleData = await subtitle.json();
 
-    subtitle.forEach((sub) => {
+    subtitleData.subtitles.forEach((sub: any) => {
       subtitles.push({
-        id: sub.title,
-        lang: 'id',
-        url: sub.link,
+        id: sub.id,
+        lang: sub.lang,
+        url: sub.url,
       });
-    });
+    })
 
     cache.set(cacheKey, subtitles);
     return subtitles;
