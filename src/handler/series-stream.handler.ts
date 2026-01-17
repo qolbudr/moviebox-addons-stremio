@@ -79,7 +79,7 @@ export const seriesStreamHandle = async (id: string) => {
     content.processedSources.forEach((source: any) => {
       streams.push({
         title: `${source.quality} - ${movieInfo?.subject?.title || 'N/A'}`,
-        url: `https://moviebox-omega-blush.vercel.app/api/stream?url=${encodeURIComponent(source.directUrl)}`,
+        url: source.directUrl,
         name: `MovieBox`,
         behaviorHints: {
           notWebReady: true,
