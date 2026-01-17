@@ -70,15 +70,26 @@ export const movieStreamHandle = async (id: string) => {
       content.processedSources = sources;
     }
 
-    let streams: Stream[] = [];
+    let streams = [];
 
     content.processedSources.forEach((source: any) => {
       streams.push({
         title: `${source.quality} - ${movieInfo?.subject?.title || 'N/A'}`,
-        url: `https://moviebox-omega-blush.vercel.app/api/stream?url=${encodeURIComponent(source.directUrl)}`,
+        url: source.directUrl,
         name: `MovieBox`,
+        behaviorHints: {
+          notWebReady: true,
+          proxyHeaders: {
+            request: {
+              "Referer": "https://fmoviesunblocked.net/",
+              "Origin": "https://fmoviesunblocked.net",
+              "User-Agent": "okhttp/4.12.0"
+            }
+          }
+        }
       });
     })
+    
     return streams;
   } catch (error) {
     throw new Error('Failed to fetch movie stream');
